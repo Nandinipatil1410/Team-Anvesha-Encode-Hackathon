@@ -1,30 +1,130 @@
-.App {
-  text-align: center;
-  margin-top: 50px;
+/* General Layout */
+.chat-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #f1f1f1;
 }
 
-input {
+.history-section {
+  width: 300px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-section h3 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.history-item {
+  background-color: #e5e5ea;
   padding: 10px;
-  margin: 10px;
+  margin: 5px 0;
+  cursor: pointer;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  font-weight: bold;
+  font-size: 16px;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #28a745;
+.history-item:hover {
+  background-color: #ccc;
+}
+
+.chat-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  max-width: 70%;
+  height: 100%;
+  position: relative;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 20px;
+  margin: 10px 0;
+  max-width: 75%;
+  word-break: break-word;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.user-message {
+  background-color: #007bff;
+  color: white;
+  align-self: flex-end;
+}
+
+.ai-message {
+  background-color: #e5e5ea;
+  color: black;
+  align-self: flex-start;
+}
+
+/* Input and Controls */
+.input-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.input-field {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  width: 80%;
+}
+
+.speech-button,
+.send-button {
+  padding: 12px 20px;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
+  width: 18%;
+  font-size: 16px;
 }
 
-button:hover {
-  background-color: #218838;
+.speech-button {
+  background-color: #28a745;
 }
 
-p {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #333;
+.new-chat-button {
+  padding: 12px 20px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.speech-checkbox {
+  margin-right: 5px;
 }

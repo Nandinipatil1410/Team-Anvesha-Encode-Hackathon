@@ -1,46 +1,44 @@
 const express = require('express');
-const twilio = require('twilio');
 const cors = require('cors');
-require('dotenv').config();  // Load environment variables from .env file
+const bodyParser = require('body-parser');
 
+// Initialize the express app
 const app = express();
-const port = 5000;
+const port = 5000;  // Backend will run on port 5000
 
-// Enable CORS for React to interact with this backend
-app.use(cors());
+// Middleware setup
+app.use(cors());  // Enable CORS for frontend to communicate
+app.use(bodyParser.json());  // Parse JSON bodies
 
-// Endpoint to make the call
-app.get('/make-call', (req, res) => {
-  const { toPhoneNumber } = req.query;
+// Simulated AI Response (can be replaced with actual AI service)
+const getAIResponse = async (userMessage) => {
+  // You can replace this with an actual API call (e.g., OpenAI, Dialogflow)
+  const aiResponses = [
+    "Hello! How can I assist you today?",
+    "I'm an AI chatbot, nice to meet you!",
+    "Sorry, I didn't understand that. Could you please rephrase?",
+    "That's an interesting question! Let me think..."
+  ];
+  return aiResponses[Math.floor(Math.random() * aiResponses.length)];
+};
 
-  if (!toPhoneNumber) {
-    return res.status(400).send({ message: 'Missing phone number parameter' });
+// Handle chat requests
+app.post('/chat', async (req, res) => {
+  const { message } = req.body;
+  
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
   }
 
-  // Twilio credentials (from .env file)
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const fromPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-
-  const client = new twilio(accountSid, authToken);
-
-  // Make the phone call
-  client.calls.create({
-    to: toPhoneNumber,  // Phone number passed from frontend
-    from: fromPhoneNumber,  // Your Twilio phone number
-    twiml: '<Response><Say voice="alice">Hello, this is a call from your Twilio application!</Say></Response>'
-  })
-  .then(call => {
-    console.log(call.sid);
-    res.send({ message: 'Call is being placed...', callSid: call.sid });
-  })
-  .catch(err => {
-    console.error(err);
-    res.status(500).send('Error making call');
-  });
+  try {
+    const aiResponse = await getAIResponse(message);  // Get AI's response
+    res.json({ response: aiResponse });  // Send AI's response back
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get AI response" });
+  }
 });
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
