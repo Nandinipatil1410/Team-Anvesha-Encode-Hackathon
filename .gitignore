@@ -1,3 +1,23 @@
+# Ignore .env files
 /backend/.env
-/backend/node_modules
-/frontedn/node_modules
+/frontend/.env
+
+# Ignore node_modules folders
+/backend/node_modules/
+/frontend/node_modules/
+
+# Ignore build directories
+/build/
+/dist/
+
+# Ignore log and temporary files
+*.log
+*.tmp
+
+# Ignore IDE and editor-specific files
+.vscode/
+.idea/
+
+# Optional: Ignore other backup files
+*.bak
+*.swp
