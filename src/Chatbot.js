@@ -12,7 +12,7 @@ const Chatbot = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Removed the line that speaks user input, so only bot responses will be spoken
+    // Play bot responses as audio when they arrive
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1].message;
       if (lastMessage && messages[messages.length - 1].sender === 'bot') {
@@ -30,9 +30,7 @@ const Chatbot = () => {
     setUserInput('');
 
     try {
-      const response = await getResponseFromHuggingFace(userInput);
-      const botMessage = response[0]?.generated_text || 'Sorry, I didn’t understand that.';
-
+      const botMessage = await getResponseFromNVIDIA(userInput);
       setMessages([...newMessages, { message: botMessage, sender: 'bot' }]);
     } catch (error) {
       console.error('Error fetching AI response:', error);
@@ -41,22 +39,20 @@ const Chatbot = () => {
     }
   };
 
-  // Function to get response from Hugging Face API
-  const getResponseFromHuggingFace = async (input) => {
+  // Function to get response from NVIDIA Generative AI API
+  const getResponseFromNVIDIA = async (input) => {
     try {
-      const response = await axios.post(
-        'https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill',
-        { inputs: input },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.REACT_APP_HUGGINGFACE_API_KEY}`,
-          },
-        }
-      );
-      return response.data;
+      const response = await axios.post('http://localhost:5000/api/nvidia', {
+        model: 'meta/llama3-70b-instruct',
+        messages: [{ role: 'user', content: input }],
+        temperature: 0.5,
+        top_p: 1,
+        max_tokens: 1024,
+      });
+      return response.data.choices[0]?.message?.content || 'No response from AI.';
     } catch (error) {
-      console.error('Error fetching AI response:', error);
-      return [{ generated_text: 'Sorry, there was an issue with my response.' }];
+      console.error('Proxy Error:', error.message);
+      throw new Error('Error fetching AI response');
     }
   };
 
@@ -70,7 +66,7 @@ const Chatbot = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          voice_id: 'emily', // Choose the voice ID you want
+          voice_id: 'emily', // Voice ID
           text: text,
           speed: 1,
           sample_rate: 24000,
@@ -82,16 +78,14 @@ const Chatbot = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Failed to fetch audio from Smallest AI:", errorData);
+        console.error('Failed to fetch audio from Smallest AI:', errorData);
         return null;
       }
 
-      // Handling the response as a Blob (audio file)
       const blob = await response.blob();
-      const audioUrl = URL.createObjectURL(blob); // Create a URL for the Blob
-      return audioUrl;
+      return URL.createObjectURL(blob);
     } catch (error) {
-      console.error("Error with Smallest AI API:", error);
+      console.error('Error with Smallest AI API:', error);
       return null;
     }
   };
@@ -165,17 +159,13 @@ const Chatbot = () => {
           <Button variant="outlined" className="new-chat">
             + New Chat
           </Button>
-          {/* Add chat history items here */}
           <div className="history-item">Previous Chat 1</div>
           <div className="history-item">Previous Chat 2</div>
         </div>
       </div>
 
       <div className="main-content">
-        <IconButton 
-          className="sidebar-toggle"
-          onClick={toggleSidebar}
-        >
+        <IconButton className="sidebar-toggle" onClick={toggleSidebar}>
           <MenuIcon />
         </IconButton>
 
