@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, TextField, Box } from '@mui/material';
-import { Send as SendIcon, Mic as MicIcon } from '@mui/icons-material';
+import { Button, TextField, Container, Paper, Box, Typography, IconButton } from '@mui/material';
+import { Send as SendIcon, Mic as MicIcon, Menu as MenuIcon, Brightness4, Brightness7 } from '@mui/icons-material';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Removed the line that speaks user input, so only bot responses will be spoken
@@ -141,41 +143,97 @@ const Chatbot = () => {
     recognition.start();
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    document.body.classList.toggle('dark-mode');
+  };
+
   return (
-    <Box display="flex" flexDirection="column" p={2} maxWidth="500px" margin="auto" mt={5}>
-      <Box display="flex" flexDirection="column" mb={2} maxHeight="300px" overflow="auto">
-        {messages.map((msg, index) => (
-          <Box key={index} p={1} my={1} borderRadius="8px" bgcolor={msg.sender === 'user' ? 'lightblue' : 'lightgreen'}>
-            <strong>{msg.sender === 'user' ? 'You: ' : 'Bot: '}</strong>{msg.message}
-          </Box>
-        ))}
-      </Box>
-      <TextField
-        label="Say something..."
-        variant="outlined"
-        fullWidth
-        value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        disabled={isListening}
-        InputProps={{
-          endAdornment: (
-            <Button onClick={isListening ? null : startListening} variant="contained" color="primary">
-              <MicIcon />
-            </Button>
-          ),
-        }}
-      />
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={handleSubmit}
-        disabled={isLoading || isListening}
-        endIcon={<SendIcon />}
-        sx={{ mt: 2 }}
-      >
-        Send
-      </Button>
-    </Box>
+    <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
+      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          <h2>Chat History</h2>
+          <IconButton onClick={toggleTheme} className="theme-toggle">
+            {isDarkMode ? <Brightness7 /> : <Brightness4 />}
+          </IconButton>
+        </div>
+        <div className="chat-history">
+          <Button variant="outlined" className="new-chat">
+            + New Chat
+          </Button>
+          {/* Add chat history items here */}
+          <div className="history-item">Previous Chat 1</div>
+          <div className="history-item">Previous Chat 2</div>
+        </div>
+      </div>
+
+      <div className="main-content">
+        <IconButton 
+          className="sidebar-toggle"
+          onClick={toggleSidebar}
+        >
+          <MenuIcon />
+        </IconButton>
+
+        <Container className="chat-container">
+          <Paper className="chat-paper">
+            <Box className="messages-area">
+              {messages.map((msg, index) => (
+                <Box key={index} className={`message-wrapper ${msg.sender}`}>
+                  <Paper className={`message-bubble ${msg.sender}`}>
+                    <Typography>{msg.message}</Typography>
+                  </Paper>
+                </Box>
+              ))}
+            </Box>
+
+            <Box className="input-area">
+              <Box className="input-container">
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Type your message here..."
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  disabled={isListening}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  multiline
+                  maxRows={4}
+                  className="chat-input"
+                />
+                <Box className="button-group">
+                  <Button
+                    variant="contained"
+                    onClick={isListening ? null : startListening}
+                    disabled={isListening}
+                    className="mic-button"
+                  >
+                    <MicIcon />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={isLoading || isListening || !userInput.trim()}
+                    className="send-button"
+                  >
+                    <SendIcon />
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
+          </Paper>
+        </Container>
+      </div>
+    </div>
   );
 };
 
