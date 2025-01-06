@@ -58,10 +58,49 @@ const Chatbot = () => {
     }
   };
 
-  // Function to handle speech synthesis (Bot speaking)
-  const speakResponse = (text) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speechSynthesis.speak(speech);
+  // Function to fetch voice from Smallest AI and play the audio
+  const fetchVoiceFromSmallestAI = async (text) => {
+    try {
+      const options = {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzdiYmE0MGM0NDE1ODdhYjZlZTBhZjUiLCJ0eXBlIjoiYXBpS2V5IiwiaWF0IjoxNzM2MTYxODU2LCJleHAiOjQ4OTE5MjE4NTZ9.sQFZALV1ek5UTijIewITo64J851_byHjJ0y13ClkXX8', // Replace with your Smallest AI token
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          voice_id: 'emily', // Choose the voice ID you want
+          text: text,
+          speed: 1,
+          sample_rate: 24000,
+          add_wav_header: true,
+        }),
+      };
+
+      const response = await fetch('https://waves-api.smallest.ai/api/v1/lightning/get_speech', options);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to fetch audio from Smallest AI:", errorData);
+        return null;
+      }
+
+      // Handling the response as a Blob (audio file)
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob); // Create a URL for the Blob
+      return audioUrl;
+    } catch (error) {
+      console.error("Error with Smallest AI API:", error);
+      return null;
+    }
+  };
+
+  // Function to handle speech synthesis (Bot speaking) using Smallest AI
+  const speakResponse = async (text) => {
+    const audioUrl = await fetchVoiceFromSmallestAI(text);
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+    }
   };
 
   // Function to handle listening to user input (speech recognition)
