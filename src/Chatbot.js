@@ -3,6 +3,34 @@ import axios from 'axios';
 import { Button, TextField, Container, Paper, Box, Typography, IconButton } from '@mui/material';
 import { Send as SendIcon, Mic as MicIcon, Menu as MenuIcon, Brightness4, Brightness7 } from '@mui/icons-material';
 
+// Constants for chunking messages
+const MAX_CHUNK_LENGTH = 200;
+
+// Function to split text into smaller chunks
+const splitTextIntoChunks = (text, maxLength) => {
+  const chunks = [];
+  let start = 0;
+  while (start < text.length) {
+    let end = Math.min(start + maxLength, text.length);
+    // Ensure we split at the end of a word, not in the middle
+    if (end < text.length && text[end] !== ' ') {
+      end = text.lastIndexOf(' ', end);
+    }
+    chunks.push(text.slice(start, end).trim());
+    start = end;
+  }
+  return chunks;
+};
+
+// Function to play audio sequentially
+const playAudioSequentially = (audioUrl) => {
+  return new Promise((resolve) => {
+    const audio = new Audio(audioUrl);
+    audio.onended = resolve; // Resolve the promise when audio ends
+    audio.play();
+  });
+};
+
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
@@ -92,10 +120,13 @@ const Chatbot = () => {
 
   // Function to handle speech synthesis (Bot speaking) using Smallest AI
   const speakResponse = async (text) => {
-    const audioUrl = await fetchVoiceFromSmallestAI(text);
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.play();
+    const chunks = splitTextIntoChunks(text, MAX_CHUNK_LENGTH);
+
+    for (const chunk of chunks) {
+      const audioUrl = await fetchVoiceFromSmallestAI(chunk);
+      if (audioUrl) {
+        await playAudioSequentially(audioUrl); // Play audio sequentially
+      }
     }
   };
 
