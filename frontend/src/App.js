@@ -23,7 +23,41 @@ const Chatbot = () => {
       return "Sorry, I encountered an error.";
     }
   };
-
+  const fetchVoiceFromSmallestAI = async (text) => {
+    try {
+      const options = {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzdiYmE0MGM0NDE1ODdhYjZlZTBhZjUiLCJ0eXBlIjoiYXBpS2V5IiwiaWF0IjoxNzM2MTYxODU2LCJleHAiOjQ4OTE5MjE4NTZ9.sQFZALV1ek5UTijIewITo64J851_byHjJ0y13ClkXX8', // Replace with your Smallest AI token
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          voice_id: 'arman', // Choose the voice ID you want
+          text: text,
+          speed: 1,
+          sample_rate: 24000,
+          add_wav_header: true,
+        }),
+      };
+  
+      const response = await fetch('https://waves-api.smallest.ai/api/v1/lightning/get_speech', options);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to fetch audio from Smallest AI:", errorData);
+        return null;
+      }
+  
+      // Handling the response as a Blob (audio file)
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob); // Create a URL for the Blob
+      return audioUrl;
+    } catch (error) {
+      console.error("Error with Smallest AI API:", error);
+      return null;
+    }
+  };
+  
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -52,8 +86,12 @@ const Chatbot = () => {
     localStorage.setItem("chatHistory", JSON.stringify(updatedChatHistory));
 
     if (speechEnabled) {
-      const utterance = new SpeechSynthesisUtterance(aiResponse);
-      window.speechSynthesis.speak(utterance);
+      const audioUrl = await fetchVoiceFromSmallestAI(aiResponse);
+      if (audioUrl) {
+        const audioElement = new Audio(audioUrl);
+        audioElement.play();
+      }
+      else console.error("Failed to fetch audio from Smallest AI");
     }
   };
 
