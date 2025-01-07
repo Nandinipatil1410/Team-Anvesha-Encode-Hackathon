@@ -1,100 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Button, TextField, Container, Paper, Box, Typography, IconButton } from '@mui/material';
-import { Send as SendIcon, Mic as MicIcon, Menu as MenuIcon, Brightness4, Brightness7 } from '@mui/icons-material';
+import React, { useState, useEffect } from "react";
+import { Container, Button, TextField, Paper, Box, Typography, List, ListItem, ListItemText, IconButton } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import axios from "axios";
 
-// Constants for chunking messages
-const MAX_CHUNK_LENGTH = 200;
-
-// Function to split text into smaller chunks
-const splitTextIntoChunks = (text, maxLength) => {
-  const chunks = [];
-  let start = 0;
-  while (start < text.length) {
-    let end = Math.min(start + maxLength, text.length);
-    // Ensure we split at the end of a word, not in the middle
-    if (end < text.length && text[end] !== ' ') {
-      end = text.lastIndexOf(' ', end);
-    }
-    chunks.push(text.slice(start, end).trim());
-    start = end;
-  }
-  return chunks;
-};
-
-// Function to play audio sequentially
-const playAudioSequentially = (audioUrl) => {
-  return new Promise((resolve) => {
-    const audio = new Audio(audioUrl);
-    audio.onended = resolve; // Resolve the promise when audio ends
-    audio.play();
+const ChatApp = () => {
+  const [chatHistory, setChatHistory] = useState(() => {
+    const storedHistory = localStorage.getItem("chatHistory");
+    return storedHistory ? JSON.parse(storedHistory) : {};
   });
-};
-
-const Chatbot = () => {
-  const [messages, setMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
+  const [chatNames, setChatNames] = useState(() => {
+    const storedNames = localStorage.getItem("chatNames");
+    return storedNames ? JSON.parse(storedNames) : {};
+  });
+  const [currentChatId, setCurrentChatId] = useState(() => {
+    const storedChatId = localStorage.getItem("currentChatId");
+    return storedChatId || `Chat 1`;
+  });
+  const [messages, setMessages] = useState(chatHistory[currentChatId] || []);
+  const [userInput, setUserInput] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const MAX_CHUNK_LENGTH = 200;
 
   useEffect(() => {
-    // Play bot responses as audio when they arrive
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1].message;
-      if (lastMessage && messages[messages.length - 1].sender === 'bot') {
-        speakResponse(lastMessage);
-      }
-    }
-  }, [messages]);
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    localStorage.setItem("chatNames", JSON.stringify(chatNames));
+    localStorage.setItem("currentChatId", currentChatId);
+  }, [chatHistory, chatNames, currentChatId]);
 
-  // Function to handle sending user input and getting the AI response
-  const handleSubmit = async () => {
-    if (userInput.trim() === '') return;
-    const newMessages = [...messages, { message: userInput, sender: 'user' }];
-    setMessages(newMessages);
-    setIsLoading(true);
-    setUserInput('');
-
+  const getResponseFromNVIDIA = async (input, retries = 3) => {
     try {
-      const botMessage = await getResponseFromNVIDIA(userInput);
-      setMessages([...newMessages, { message: botMessage, sender: 'bot' }]);
-    } catch (error) {
-      console.error('Error fetching AI response:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Function to get response from NVIDIA Generative AI API
-  const getResponseFromNVIDIA = async (input) => {
-    try {
-      const response = await axios.post('http://localhost:5000/api/nvidia', {
-        model: 'meta/llama3-70b-instruct',
-        messages: [{ role: 'user', content: input }],
+      const response = await axios.post("http://localhost:5000/api/nvidia", {
+        model: "meta/llama3-70b-instruct",
+        messages: [{ role: "user", content: input }],
         temperature: 0.5,
         top_p: 1,
         max_tokens: 1024,
       });
-      return response.data.choices[0]?.message?.content || 'No response from AI.';
+
+      return response.data.choices[0]?.message?.content || "No response from AI.";
     } catch (error) {
-      console.error('Proxy Error:', error.message);
-      throw new Error('Error fetching AI response');
+      console.error("Error fetching AI response:", error.message);
+      if (retries > 0) {
+        console.log(`Retrying... (${3 - retries + 1}/${3})`);
+        return getResponseFromNVIDIA(input, retries - 1);
+      } else {
+        return "Error fetching AI response after multiple attempts.";
+      }
     }
   };
 
-  // Function to fetch voice from Smallest AI and play the audio
   const fetchVoiceFromSmallestAI = async (text) => {
     try {
       const options = {
-        method: 'POST',
+        method: "POST",
         headers: {
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzdiYmE0MGM0NDE1ODdhYjZlZTBhZjUiLCJ0eXBlIjoiYXBpS2V5IiwiaWF0IjoxNzM2MTYxODU2LCJleHAiOjQ4OTE5MjE4NTZ9.sQFZALV1ek5UTijIewITo64J851_byHjJ0y13ClkXX8', // Replace with your Smallest AI token
-          'Content-Type': 'application/json',
+          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzdiYmE0MGM0NDE1ODdhYjZlZTBhZjUiLCJ0eXBlIjoiYXBpS2V5IiwiaWF0IjoxNzM2MTYxODU2LCJleHAiOjQ4OTE5MjE4NTZ9.sQFZALV1ek5UTijIewITo64J851_byHjJ0y13ClkXX8",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          voice_id: 'emily', // Voice ID
+          voice_id: "emily",
           text: text,
           speed: 1,
           sample_rate: 24000,
@@ -102,35 +67,110 @@ const Chatbot = () => {
         }),
       };
 
-      const response = await fetch('https://waves-api.smallest.ai/api/v1/lightning/get_speech', options);
+      const response = await fetch("https://waves-api.smallest.ai/api/v1/lightning/get_speech", options);
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Failed to fetch audio from Smallest AI:', errorData);
+        console.error("Failed to fetch audio from Smallest AI:", errorData);
         return null;
       }
 
       const blob = await response.blob();
       return URL.createObjectURL(blob);
     } catch (error) {
-      console.error('Error with Smallest AI API:', error);
+      console.error("Error with Smallest AI API:", error);
       return null;
     }
   };
 
-  // Function to handle speech synthesis (Bot speaking) using Smallest AI
+  const playAudioSequentially = (audioUrl) =>
+    new Promise((resolve) => {
+      const audio = new Audio(audioUrl);
+      audio.onended = resolve;
+      audio.onerror = resolve;
+      audio.play();
+    });
+
   const speakResponse = async (text) => {
     const chunks = splitTextIntoChunks(text, MAX_CHUNK_LENGTH);
 
     for (const chunk of chunks) {
       const audioUrl = await fetchVoiceFromSmallestAI(chunk);
       if (audioUrl) {
-        await playAudioSequentially(audioUrl); // Play audio sequentially
+        await playAudioSequentially(audioUrl);
       }
     }
   };
 
-  // Function to handle listening to user input (speech recognition)
+  const splitTextIntoChunks = (text, maxLength) => {
+    const chunks = [];
+    let start = 0;
+    while (start < text.length) {
+      chunks.push(text.slice(start, start + maxLength));
+      start += maxLength;
+    }
+    return chunks;
+  };
+
+  const handleSendMessage = async () => {
+    if (userInput.trim() === "") return;
+
+    const newMessage = { text: userInput, sender: "user" };
+    const updatedMessages = [...messages, newMessage];
+
+    setMessages(updatedMessages);
+    setChatHistory({
+      ...chatHistory,
+      [currentChatId]: updatedMessages,
+    });
+    setUserInput("");
+
+    const botResponse = await getResponseFromNVIDIA(userInput);
+    const botMessage = { text: botResponse, sender: "bot" };
+
+    const updatedMessagesWithBot = [...updatedMessages, botMessage];
+    setMessages(updatedMessagesWithBot);
+    setChatHistory({
+      ...chatHistory,
+      [currentChatId]: updatedMessagesWithBot,
+    });
+
+    await speakResponse(botResponse);
+  };
+
+  const createNewChat = () => {
+    const newChatId = `Chat ${Object.keys(chatHistory).length + 1}`;
+    setCurrentChatId(newChatId);
+    setMessages([]);
+    setChatHistory({
+      ...chatHistory,
+      [newChatId]: [],
+    });
+    setChatNames({
+      ...chatNames,
+      [newChatId]: newChatId,
+    });
+  };
+
+  const loadChat = (chatId) => {
+    setCurrentChatId(chatId);
+    setMessages(chatHistory[chatId] || []);
+  };
+
+  const editChatName = (chatId, newName) => {
+    setChatNames({
+      ...chatNames,
+      [chatId]: newName,
+    });
+  };
+
+  const handleEditChatName = (chatId) => {
+    const newName = prompt("Enter a new name for this chat:", chatNames[chatId] || chatId);
+    if (newName) {
+      editChatName(chatId, newName);
+    }
+  };
+
   const startListening = () => {
     setIsListening(true);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -151,7 +191,7 @@ const Chatbot = () => {
     recognition.onresult = (event) => {
       const speechResult = event.results[0][0].transcript;
       setUserInput(speechResult);
-      handleSubmit();
+      handleSendMessage();
       setIsListening(false);
     };
 
@@ -168,94 +208,123 @@ const Chatbot = () => {
     recognition.start();
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.body.classList.toggle('dark-mode');
-  };
-
   return (
-    <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
-      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-        <div className="sidebar-header">
-          <h2>Chat History</h2>
-          <IconButton onClick={toggleTheme} className="theme-toggle">
-            {isDarkMode ? <Brightness7 /> : <Brightness4 />}
-          </IconButton>
-        </div>
-        <div className="chat-history">
-          <Button variant="outlined" className="new-chat">
-            + New Chat
+    <Container style={{ marginTop: "20px" }}>
+      <Box display="flex" justifyContent="flex-start" alignItems="flex-start">
+        {/* Chat History Section */}
+        <Box
+          style={{
+            width: "30%", 
+            maxHeight: "500px", 
+            overflowY: "auto", 
+            border: "1px solid #ccc", 
+            borderRadius: "8px", 
+            padding: "8px"
+          }}
+        >
+          <Typography variant="h6" align="center">Chat History</Typography>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            onClick={createNewChat} 
+            style={{ marginBottom: "8px" }}
+          >
+            New Chat
           </Button>
-          <div className="history-item">Previous Chat 1</div>
-          <div className="history-item">Previous Chat 2</div>
-        </div>
-      </div>
-
-      <div className="main-content">
-        <IconButton className="sidebar-toggle" onClick={toggleSidebar}>
-          <MenuIcon />
-        </IconButton>
-
-        <Container className="chat-container">
-          <Paper className="chat-paper">
-            <Box className="messages-area">
-              {messages.map((msg, index) => (
-                <Box key={index} className={`message-wrapper ${msg.sender}`}>
-                  <Paper className={`message-bubble ${msg.sender}`}>
-                    <Typography>{msg.message}</Typography>
-                  </Paper>
-                </Box>
-              ))}
-            </Box>
-
-            <Box className="input-area">
-              <Box className="input-container">
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Type your message here..."
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  disabled={isListening}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
+          <List>
+            {Object.keys(chatHistory)
+              .filter((chatId) => chatHistory[chatId].length > 0)
+              .map((chatId) => (
+                <ListItem
+                  key={chatId}
+                  selected={chatId === currentChatId}
+                  onClick={() => loadChat(chatId)}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    cursor: "pointer", 
                   }}
-                  multiline
-                  maxRows={4}
-                  className="chat-input"
-                />
-                <Box className="button-group">
-                  <Button
-                    variant="contained"
-                    onClick={isListening ? null : startListening}
-                    disabled={isListening}
-                    className="mic-button"
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "#f4f4f4", 
+                      transition: "background-color 0.3s ease", 
+                    },
+                  }}
+                >
+                  <ListItemText primary={chatNames[chatId] || chatId} />
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditChatName(chatId);
+                    }}
                   >
-                    <MicIcon />
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={handleSubmit}
-                    disabled={isLoading || isListening || !userInput.trim()}
-                    className="send-button"
-                  >
-                    <SendIcon />
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-          </Paper>
-        </Container>
-      </div>
-    </div>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </ListItem>
+              ))}
+          </List>
+        </Box>
+  
+        {/* Current Chat Section */}
+        <Box
+          style={{
+            width: "70%", 
+            marginLeft: "20px", 
+            border: "1px solid #ccc", 
+            borderRadius: "8px", 
+            padding: "8px"
+          }}
+        >
+          <Typography variant="h6" align="center">{chatNames[currentChatId] || currentChatId}</Typography>
+          <Box style={{ maxHeight: "400px", overflowY: "auto", marginTop: "16px" }}>
+            {messages.length > 0 ? (
+              messages.filter((message) => message && message.text && message.sender)
+                .map((message, index) => (
+                  <Box key={index} style={{ marginBottom: "8px" }}>
+                    <Typography style={{ textAlign: message.sender === "user" ? "right" : "left", color: message.sender === "user" ? "blue" : "green" }}>
+                      {message.text}
+                    </Typography>
+                  </Box>
+                ))
+            ) : (
+              <Typography variant="body2" color="textSecondary" align="center">No messages yet.</Typography>
+            )}
+          </Box>
+  
+          <Box display="flex" alignItems="center" marginTop="16px">
+            <TextField 
+              fullWidth 
+              variant="outlined" 
+              placeholder="Type your message..." 
+              value={userInput} 
+              onChange={(e) => setUserInput(e.target.value)} 
+              onKeyPress={(e) => { if (e.key === "Enter") handleSendMessage(); }} 
+            />
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleSendMessage} 
+              style={{ marginLeft: "8px" }}
+            >
+              Send
+            </Button>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              onClick={startListening} 
+              style={{ marginLeft: "8px" }} 
+              disabled={isListening}
+            >
+              🎤
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
+  
 };
 
-export default Chatbot;
+export default ChatApp;
