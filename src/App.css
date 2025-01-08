@@ -291,3 +291,26 @@ body {
 .dark-mode .send-button:disabled .MuiSvgIcon-root {
   color: rgba(255, 255, 255, 0.3) !important;
 }
+
+/* Make the chat container flexible */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Messages area should take up the available space */
+.messages-area {
+  flex-grow: 1;
+  overflow-y: auto;  /* Make messages scrollable */
+  padding-bottom: 20px;  /* Add a little space at the bottom for the input area */
+}
+
+/* Adjust input area to stay at the bottom */
+.input-area {
+  margin-top: 20px;  /* Adjust top margin if needed */
+}
+
+.chat-input {
+  margin-bottom: 10px;  /* Ensure there's some space at the bottom of the input field */
+}
