@@ -154,18 +154,50 @@ const ChatApp = () => {
   useEffect(() => {
     // Greet the user when the chat app loads
     const greetUser = async () => {
-      const greeting = "Hello there! 🌟 Are you ready to transform your daily routine with a smartwatch that’s not just smart, but life-changing?⌚✨ Let’s explore how it can redefine your day—shall we?";
-      const botMessage = { text: greeting, sender: "bot" };
+      const imageCard = {
+        type: 'card',
+        content: {
+          image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg',
+          title: 'Fire-Boltt Ninja Call Pro Plus Smart Watch',
+          specs: [
+            { label: 'Display', value: '1.83" HD' },
+            { label: 'Resolution', value: '240x280px' },
+            { label: 'Water Resistance', value: 'IP67' },
+            { label: 'Bluetooth', value: 'Calling' },
+            { label: 'Sports Modes', value: '100+' }
+          ],
+          price: '$200',
+          colors: [
+            {
+              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
+            },
+            {
+              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
+            },
+            {
+              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
+            }
+          ],
+          rating: '3.9 ★★★★☆',
+          reviews: '42,431'
+        }
+      };
 
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages, botMessage];
-        setChatHistory((prevHistory) => ({
-          ...prevHistory,
-          [currentChatId]: updatedMessages,
-        }));
-        return updatedMessages;
-      });
+      const greeting = "Hello there! 🌟 Are you ready to transform your daily routine with a smartwatch that's not just smart, but life-changing?⌚✨ Let's explore how it can redefine your day—shall we?";
+      
+      // First set the messages
+      const initialMessages = [
+        { text: greeting, sender: "bot" },
+        { text: imageCard, sender: "bot" }
+      ];
 
+      setMessages(initialMessages);
+      setChatHistory(prevHistory => ({
+        ...prevHistory,
+        [currentChatId]: initialMessages
+      }));
+
+      // Then do text-to-speech
       await speakResponse(greeting);
     };
 
@@ -580,13 +612,15 @@ const ChatApp = () => {
                           <Paper
                             elevation={3}
                             style={{
-                              maxWidth: '300px',
+                              maxWidth: '400px',
+                              width: '100%',
                               borderRadius: '12px',
                               overflow: 'hidden',
                               backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
                               border: darkMode 
                                 ? '1px solid rgba(255,255,255,0.1)'
                                 : '1px solid rgba(0,0,0,0.1)',
+                              margin: '0 auto'
                             }}
                           >
                             {message.text.content.image && (
@@ -667,14 +701,15 @@ const ChatApp = () => {
                                     ? '1px solid rgba(255,255,255,0.1)'
                                     : '1px solid rgba(0,0,0,0.1)',
                                   marginTop: '12px',
-                                  paddingTop: '12px'
+                                  padding: '12px 16px',
                                 }}
                               >
                                 <Typography 
                                   variant="subtitle2" 
                                   style={{
                                     color: darkMode ? '#b3b3b3' : '#666666',
-                                    marginBottom: '8px'
+                                    marginBottom: '8px',
+                                    paddingLeft: '8px'
                                   }}
                                 >
                                   Available Colors:
@@ -682,9 +717,10 @@ const ChatApp = () => {
                                 <Box 
                                   style={{
                                     display: 'flex',
-                                    gap: '12px',
-                                    justifyContent: 'center',
-                                    padding: '0 16px'
+                                    gap: '8px',
+                                    justifyContent: 'flex-start',
+                                    flexWrap: 'wrap',
+                                    padding: '0 8px'
                                   }}
                                 >
                                   {message.text.content.colors.map((color, index) => (
@@ -692,9 +728,9 @@ const ChatApp = () => {
                                       key={index}
                                       elevation={2}
                                       style={{
-                                        width: '80px',
-                                        height: '80px',
-                                        borderRadius: '10px',
+                                        width: '70px',
+                                        height: '70px',
+                                        borderRadius: '8px',
                                         overflow: 'hidden',
                                         border: darkMode 
                                           ? '1px solid rgba(255,255,255,0.2)'
@@ -724,13 +760,17 @@ const ChatApp = () => {
                                       display: 'flex',
                                       justifyContent: 'space-between',
                                       alignItems: 'center',
-                                      marginTop: '12px'
+                                      marginTop: '12px',
+                                      padding: '0 16px 16px',
+                                      flexWrap: 'wrap',
+                                      gap: '8px'
                                     }}
                                   >
                                     <Typography 
                                       variant="body2"
                                       style={{
                                         color: darkMode ? '#90caf9' : '#1976d2',
+                                        whiteSpace: 'nowrap'
                                       }}
                                     >
                                       {message.text.content.rating}
@@ -739,6 +779,7 @@ const ChatApp = () => {
                                       variant="body2"
                                       style={{
                                         color: darkMode ? '#b3b3b3' : '#666666',
+                                        whiteSpace: 'nowrap'
                                       }}
                                     >
                                       ({message.text.content.reviews} reviews)
