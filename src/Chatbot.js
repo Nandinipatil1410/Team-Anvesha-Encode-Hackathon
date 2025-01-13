@@ -322,10 +322,7 @@ const ChatApp = () => {
     const intentResponse = matchIntent(userInput);
     const botResponse = intentResponse || await getResponseFromNVIDIA(userInput);
     
-    if (typeof botResponse === 'string') {
-      await speakResponse(botResponse);
-    }
-
+    // Add bot message immediately
     const botMessage = { text: botResponse, sender: "bot" };
     const updatedMessagesWithBot = [...updatedMessages, botMessage];
 
@@ -334,6 +331,11 @@ const ChatApp = () => {
       ...chatHistory,
       [currentChatId]: updatedMessagesWithBot,
     });
+
+    // Play speech in the background without awaiting
+    if (typeof botResponse === 'string') {
+      speakResponse(botResponse); // Removed await
+    }
   };
 
   // Creating a new chat
