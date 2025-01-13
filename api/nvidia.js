@@ -17,7 +17,7 @@ export default async function handler(req, res) {
                 },
                 {
                     headers: {
-                        Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`, // Store key securely in Vercel
+                        Authorization: `Bearer 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`, // Store key securely in Vercel
                         'Content-Type': 'application/json',
                     },
                 }
