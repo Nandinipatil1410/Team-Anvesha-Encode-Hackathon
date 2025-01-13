@@ -7,7 +7,7 @@ const app = express();
 const PORT = 5000; // Port where the proxy will run
 
 // Use CORS to allow requests from the frontend (localhost:3000)
-app.use(cors());
+app.use(cors({ origin: 'https://team-anvesha-encode-hackathon.vercel.app/' }));
 
 // Middleware to parse JSON requests
 app.use(express.json());
