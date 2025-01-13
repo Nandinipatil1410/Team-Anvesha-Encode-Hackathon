@@ -217,7 +217,7 @@ const ChatApp = () => {
 
   const getResponseFromNVIDIA = async (input, retries = 3) => {
     try {
-      const response = await axios.post("/api/nvidia", {
+      const response = await axios.post("https://backend-for-encode-hackathon.onrender.com", {
         model: "meta/llama3-70b-instruct",
         messages: [
           { role: "system", content: productContext },
