@@ -217,28 +217,28 @@ const ChatApp = () => {
 
   const getResponseFromNVIDIA = async (input, retries = 3) => {
     try {
-        const response = await axios.post("https://backend-for-encode-hackathon.onrender.com/api/nvidia", {
-            model: "meta/llama3-70b-instruct",
-            messages: [
-                { role: "system", content: productContext },
-                { role: "user", content: input },
-            ],
-            temperature: 0.5,
-            top_p: 1,
-            max_tokens: 1024,
-        });
-
-        return response.data.choices[0]?.message?.content || "No response from AI.";
+      const response = await axios.post("/api/nvidia", {
+        model: "meta/llama3-70b-instruct",
+        messages: [
+          { role: "system", content: productContext },
+          { role: "user", content: input },
+        ],
+        temperature: 0.5,
+        top_p: 1,
+        max_tokens: 1024,
+      });
+  
+      return response.data.choices[0]?.message?.content || "No response from AI.";
     } catch (error) {
-        console.error("Error fetching AI response:", error.message);
-        if (retries > 0) {
-            return getResponseFromNVIDIA(input, retries - 1);
-        } else {
-            return "Error fetching AI response after multiple attempts.";
-        }
+      console.error("Error fetching AI response:", error.message);
+      if (retries > 0) {
+        return getResponseFromNVIDIA(input, retries - 1);
+      } else {
+        return "Error fetching AI response after multiple attempts.";
+      }
     }
-};
-
+  };
+  
 
   const fetchVoiceFromSmallestAI = async (text) => {
     try {
