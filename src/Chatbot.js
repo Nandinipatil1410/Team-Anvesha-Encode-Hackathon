@@ -18,7 +18,7 @@ const Header = ({ darkMode }) => {
         top: 0,
         left: 0,
         right: 0,
-        padding: '15px 20px',
+        padding: '12px 16px',
         background: darkMode 
           ? 'linear-gradient(135deg, #1a1a1a 0%, #2c5364 100%)'
           : 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%)',
@@ -44,7 +44,8 @@ const Header = ({ darkMode }) => {
           textShadow: darkMode 
             ? '2px 2px 4px rgba(0,0,0,0.5)'
             : '1px 1px 2px rgba(0,0,0,0.2)',
-          letterSpacing: '1px'
+          letterSpacing: '1px',
+          fontSize: window.innerWidth < 600 ? '1.5rem' : '2.125rem',
         }}
       >
         SmartWatch AI
@@ -57,7 +58,8 @@ const Header = ({ darkMode }) => {
           textShadow: darkMode 
             ? '1px 1px 2px rgba(0,0,0,0.5)'
             : '1px 1px 1px rgba(0,0,0,0.1)',
-          letterSpacing: '0.5px'
+          letterSpacing: '0.5px',
+          fontSize: window.innerWidth < 600 ? '0.875rem' : '1rem',
         }}
       >
         Your Intelligent Shopping Assistant
@@ -66,7 +68,7 @@ const Header = ({ darkMode }) => {
   );
 };
 
-const productContext = `You are a helpful assistant for [Your Business Name]. Here is information about our product:
+const productContext = `You are a helpful assistant for Smartwatch AI. Here is information about our product:
 - Smartwatch: A fitness tracker with heart rate monitoring, GPS, water resistance, long battery life, and device compatibility. Available with a 1-year warranty.`
 ;
 
@@ -139,6 +141,7 @@ const ChatApp = () => {
   const [showWelcomeButton, setShowWelcomeButton] = useState(true);
   const [showChatInterface, setShowChatInterface] = useState(false);
   const [showImageButton, setShowImageButton] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
 
   const MAX_CHUNK_LENGTH = 200;
 
@@ -450,13 +453,23 @@ const ChatApp = () => {
     setDrawerOpen(!drawerOpen);
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 600);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <Container 
       style={{ 
         marginTop: "80px",
-        padding: 0,
+        padding: window.innerWidth < 600 ? '0 8px' : 0,
         backgroundColor: darkMode ? '#121212' : '#f5f5f5',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        maxWidth: '100%',
       }}
     >
       <Header darkMode={darkMode} />
@@ -578,20 +591,27 @@ const ChatApp = () => {
           <Box
             style={{
               width: "100%",
-              padding: "16px",
+              padding: window.innerWidth < 600 ? "8px" : "16px",
               marginLeft: "auto",
               marginRight: "auto",
               maxWidth: "1200px",
-              color: darkMode ? '#f5f5f5' : '#121212'
+              color: darkMode ? '#f5f5f5' : '#121212',
+              height: 'calc(100vh - 80px)',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              paddingBottom: 0,
             }}
           >
             <Box 
               style={{ 
-                maxHeight: "calc(100vh - 200px)", 
+                flex: 1,
                 overflowY: "auto", 
-                marginTop: "16px",
+                marginTop: window.innerWidth < 600 ? "8px" : "16px",
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
+                paddingBottom: "70px",
+                maxHeight: 'calc(100vh - 160px)',
               }}
             >
               <Typography 
@@ -620,7 +640,7 @@ const ChatApp = () => {
                       <Paper
                         style={{
                           display: "inline-block",
-                          padding: "12px 16px",
+                          padding: window.innerWidth < 600 ? "8px 12px" : "12px 16px",
                           borderRadius: "16px",
                           backgroundColor: message.sender === "user" 
                             ? (darkMode ? 'rgba(25, 118, 210, 0.15)' : 'rgba(25, 118, 210, 0.08)')
@@ -628,7 +648,7 @@ const ChatApp = () => {
                           color: message.sender === "user"
                             ? (darkMode ? '#90caf9' : '#1976d2')
                             : (darkMode ? '#e1bee7' : '#6a1b9a'),
-                          maxWidth: "70%",
+                          maxWidth: window.innerWidth < 600 ? "85%" : "70%",
                           boxShadow: darkMode 
                             ? '0 2px 4px rgba(0,0,0,0.2)' 
                             : '0 2px 4px rgba(0,0,0,0.1)',
@@ -652,7 +672,7 @@ const ChatApp = () => {
                               <Paper
                                 elevation={3}
                                 style={{
-                                  maxWidth: '400px',
+                                  maxWidth: window.innerWidth < 600 ? '100%' : '400px',
                                   width: '100%',
                                   borderRadius: '12px',
                                   overflow: 'hidden',
@@ -889,43 +909,86 @@ const ChatApp = () => {
               <div ref={messagesEndRef} />
             </Box>
 
-            <Box display="flex" alignItems="center" marginTop="16px">
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Type your message..."
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={(e) => { if (e.key === "Enter") handleSendMessage(); }}
-                sx={{
-                  backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: darkMode ? '#f5f5f5' : '#121212',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: darkMode ? '#90caf9' : '#1976d2',
-                    },
-                  },
+            <Box 
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                backgroundColor: darkMode ? '#121212' : '#f5f5f5',
+                borderTop: darkMode 
+                  ? '1px solid rgba(255,255,255,0.1)'
+                  : '1px solid rgba(0,0,0,0.1)',
+                zIndex: 1000,
+              }}
+            >
+              <Box 
+                style={{
+                  maxWidth: "1200px",
+                  margin: "0 auto",
+                  width: "100%",
+                  padding: "8px",
                 }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSendMessage}
-                style={{ marginLeft: "8px" }}
               >
-                Send
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={startListening}
-                style={{ marginLeft: "8px" }}
-                disabled={isListening}
-              >
-                🎤
-              </Button>
+                <Box 
+                  display="flex" 
+                  alignItems="center" 
+                  flexDirection={window.innerWidth < 600 ? "column" : "row"}
+                  gap={window.innerWidth < 600 ? "8px" : "0"}
+                >
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    placeholder="Type your message..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                    sx={{
+                      backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+                      '& .MuiOutlinedInput-root': {
+                        height: '45px',
+                        '& fieldset': {
+                          borderColor: darkMode ? '#f5f5f5' : '#121212',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: darkMode ? '#90caf9' : '#1976d2',
+                        },
+                      },
+                    }}
+                  />
+                  <Box 
+                    display="flex" 
+                    gap="8px"
+                    width={window.innerWidth < 600 ? "100%" : "auto"}
+                    marginLeft={window.innerWidth < 600 ? 0 : 1}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSendMessage}
+                      fullWidth={window.innerWidth < 600}
+                      style={{
+                        height: '45px',
+                      }}
+                    >
+                      Send
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={startListening}
+                      disabled={isListening}
+                      fullWidth={window.innerWidth < 600}
+                      style={{
+                        height: '45px',
+                      }}
+                    >
+                      🎤
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
             </Box>
           </Box>
         </>
@@ -939,15 +1002,17 @@ const ChatApp = () => {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 1000,
-            textAlign: 'center'
+            textAlign: 'center',
+            width: window.innerWidth < 600 ? '90%' : 'auto',
           }}
         >
           <Button
             variant="contained"
             onClick={greetUser}
             style={{
-              padding: '20px 40px',
-              fontSize: '1.2rem',
+              padding: window.innerWidth < 600 ? '16px 32px' : '20px 40px',
+              fontSize: window.innerWidth < 600 ? '1rem' : '1.2rem',
+              width: '100%',
               borderRadius: '30px',
               background: darkMode 
                 ? 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
@@ -969,7 +1034,8 @@ const ChatApp = () => {
             <Typography 
               variant="h5" 
               style={{ 
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                fontSize: window.innerWidth < 600 ? '1.2rem' : '1.5rem',
               }}
             >
               Start Conversation
