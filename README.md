@@ -21,12 +21,12 @@ This project is an AI-powered phone agent designed to handle cold calls, engage 
 
 1. Clone this repository:
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/Nandinipatil1410/Team-Anvesha-Encode-Hackathon.git
    ```
 
 2. Navigate into the project directory:
    ```bash
-   cd <project_name>
+   cd Team-Anvesha-Encode-Hackathon
    ```
 
 3. Install dependencies:
