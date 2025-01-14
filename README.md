@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+# Team Anvesha - Encode Hackathon
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is an AI-powered phone agent designed to handle cold calls, engage in meaningful conversations, and assist in closing sales. The solution utilizes Smallest.ai APIs for natural voice generation and chatbot responses, and is implemented as a smartwatch application for prototype purposes, providing an innovative user experience.
+## Features
 
-## Available Scripts
+- **Talk and Listen**: The AI agent can listen to and respond to user interactions, simulating a real conversation.
+- **Natural Conversations**: The chatbot uses natural-sounding voices and holds meaningful interactions, simulating human-like conversations.
+- **Sales Closure**: The agent is designed to close sales by addressing customer needs and providing solutions.
+- **Low Latency and High Performance**: The system is optimized for fast performance with minimal delay during voice interactions.
 
-In the project directory, you can run:
+## Technologies Used
 
-### `npm start`
+- **Smartwatch AI Chatbot**: A custom-built chatbot powered by the NVIDIA API for conversation responses.
+- **Voice Interaction**: Smallest.ai API is used to generate natural and human-like voice responses.
+- **React**: Frontend framework for building the user interface.
+- **Node.js**: Backend server handling API requests and chatbot logic.
+- **NVIDIA API**: For creating intelligent chatbot conversations.
+- **Smallest.ai API**: For generating realistic, natural voice interactions.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Installation
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Clone this repository:
+   ```bash
+   git clone <repository_url>
+   ```
 
-### `npm test`
+2. Navigate into the project directory:
+   ```bash
+   cd <project_name>
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### `npm run build`
+4. Set up environment variables by creating a `.env` file with your API keys:
+   ```bash
+   SMALLEST_API_KEY=<your_smallest_api_key>
+   NVIDIA_API_KEY=<your_nvidia_api_key>
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+5. Start the server:
+   ```bash
+   npm start
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+6. Open the application on your smartwatch or use a compatible emulator to test the functionality.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## How It Works
 
-### `npm run eject`
+1. **Cold Calling**: The agent initiates a cold call by analyzing a list of potential customers. It uses natural voice and interaction patterns to engage the user.
+2. **Engaging Conversations**: The chatbot, powered by the NVIDIA API, responds intelligently to customer queries, answering questions and providing solutions.
+3. **Sales Closing**: The AI agent recognizes when the conversation has reached a point where it can close the sale, offering final solutions or products to the customer.
+4. **Smartwatch Experience**: The app is designed to work seamlessly on a smartwatch, providing a smooth, compact interaction with the AI agent.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Future Enhancements
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Improved Voice Modulation**: Enhance the voice experience to reflect different tones and emotions.
+- **Extended Customer Segmentation**: Add more advanced filters for targeting specific customer types.
+- **Integration with CRM Systems**: Link the chatbot to customer management systems for better data tracking.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Let me know if you need further adjustments!
