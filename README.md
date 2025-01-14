@@ -56,10 +56,6 @@ This project is an AI-powered phone agent designed to handle cold calls, engage 
 
 ## Future Enhancements
 
-- **Improved Voice Modulation**: Enhance the voice experience to reflect different tones and emotions.
 - **Extended Customer Segmentation**: Add more advanced filters for targeting specific customer types.
 - **Integration with CRM Systems**: Link the chatbot to customer management systems for better data tracking.
 
----
-
-Let me know if you need further adjustments!
