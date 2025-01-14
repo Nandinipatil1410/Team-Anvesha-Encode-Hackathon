@@ -142,8 +142,70 @@ const ChatApp = () => {
   const [isListening, setIsListening] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { darkMode, toggleTheme } = useContext(ThemeContext);
+  const [showWelcomeButton, setShowWelcomeButton] = useState(true);
+  const [showChatInterface, setShowChatInterface] = useState(false);
+  const [showImageButton, setShowImageButton] = useState(true);
 
   const MAX_CHUNK_LENGTH = 200;
+
+  const greetUser = async () => {
+    setShowWelcomeButton(false);
+    setShowChatInterface(true);
+    
+    // Updated greeting with more engaging text
+    const initialMessages = [
+      { 
+        text: "Hi there! 👋 Welcome to your personal smartwatch advisor! I'm here to help you discover the perfect smartwatch that'll revolutionize your lifestyle. From fitness tracking to smart notifications, we've got something special waiting for you! ✨\n\nWould you like to see our flagship smartwatch?", 
+        sender: "bot",
+        showImageButton: true
+      }
+    ];
+
+    setMessages(initialMessages);
+    setChatHistory(prevHistory => ({
+      ...prevHistory,
+      [currentChatId]: initialMessages
+    }));
+
+    // Speak both parts of the message
+    await speakResponse("Hi there! Welcome to your personal smartwatch advisor! I'm here to help you discover the perfect smartwatch that'll revolutionize your lifestyle. From fitness tracking to smart notifications, we've got something special waiting for you!");
+    await speakResponse("Would you like to see our flagship smartwatch?");
+  };
+
+  const handleShowImage = () => {
+    const imageCard = {
+      type: 'card',
+      content: {
+        image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg',
+        title: 'Fire-Boltt Ninja Call Pro Plus Smart Watch',
+        specs: [
+          { label: 'Display', value: '1.83" HD' },
+          { label: 'Resolution', value: '240x280px' },
+          { label: 'Water Resistance', value: 'IP67' },
+          { label: 'Bluetooth', value: 'Calling' },
+          { label: 'Sports Modes', value: '100+' }
+        ],
+        price: '$200',
+        colors: [
+          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' },
+          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' },
+          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' }
+        ],
+        rating: '3.9 ★★★★☆',
+        reviews: '42,431'
+      }
+    };
+
+    const newMessage = { text: imageCard, sender: "bot" };
+    setMessages(prevMessages => {
+      const updatedMessages = [...prevMessages, newMessage];
+      setChatHistory(prevHistory => ({
+        ...prevHistory,
+        [currentChatId]: updatedMessages
+      }));
+      return updatedMessages;
+    });
+  };
 
   useEffect(() => {
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
@@ -153,54 +215,6 @@ const ChatApp = () => {
 
   useEffect(() => {
     // Greet the user when the chat app loads
-    const greetUser = async () => {
-      const imageCard = {
-        type: 'card',
-        content: {
-          image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg',
-          title: 'Fire-Boltt Ninja Call Pro Plus Smart Watch',
-          specs: [
-            { label: 'Display', value: '1.83" HD' },
-            { label: 'Resolution', value: '240x280px' },
-            { label: 'Water Resistance', value: 'IP67' },
-            { label: 'Bluetooth', value: 'Calling' },
-            { label: 'Sports Modes', value: '100+' }
-          ],
-          price: '$200',
-          colors: [
-            {
-              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-            },
-            {
-              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-            },
-            {
-              image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-            }
-          ],
-          rating: '3.9 ★★★★☆',
-          reviews: '42,431'
-        }
-      };
-
-      const greeting = "Hello there! 🌟 Are you ready to transform your daily routine with a smartwatch that's not just smart, but life-changing?⌚✨ Let's explore how it can redefine your day—shall we?";
-      
-      // First set the messages
-      const initialMessages = [
-        { text: greeting, sender: "bot" },
-        { text: imageCard, sender: "bot" }
-      ];
-
-      setMessages(initialMessages);
-      setChatHistory(prevHistory => ({
-        ...prevHistory,
-        [currentChatId]: initialMessages
-      }));
-
-      // Then do text-to-speech
-      await speakResponse(greeting);
-    };
-
     if (messages.length === 0) {
       greetUser();
     }
@@ -439,427 +453,508 @@ const ChatApp = () => {
         {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
       </IconButton>
 
-      {/* Hamburger Menu Button */}
-      <IconButton 
-        onClick={toggleDrawer}
-        style={{ 
-          position: 'fixed', 
-          left: 10, 
-          top: 20,
-          zIndex: 1100,
-          color: darkMode ? '#f5f5f5' : '#121212'
-        }}
-      >
-        <MenuIcon />
-      </IconButton>
-
-      {/* Chat History Drawer */}
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={toggleDrawer}
-        variant="temporary"
-        PaperProps={{
-          sx: {
-            backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
-            color: darkMode ? '#f5f5f5' : '#121212'
-          }
-        }}
-      >
-        <Box
-          style={{
-            width: "280px",
-            height: "100%",
-            padding: "16px",
-            overflowY: "auto",
-            scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge
-          }}
-        >
-          <Typography variant="h6" align="center">Chat History</Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={createNewChat}
-            style={{ margin: "16px 0" }}
-          >
-            New Chat
-          </Button>
-          <List>
-            {Object.keys(chatHistory)
-              .filter((chatId) => chatHistory[chatId].length > 0)
-              .map((chatId) => (
-                <ListItem
-                  key={chatId}
-                  selected={chatId === currentChatId}
-                  onClick={() => {
-                    loadChat(chatId);
-                    toggleDrawer();
-                  }}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "#f4f4f4",
-                      transition: "background-color 0.3s ease",
-                    },
-                  }}
-                >
-                  <ListItemText primary={chatNames[chatId] || chatId} />
-                  <Box>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditChatName(chatId);
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteChat(chatId);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                  </Box>
-                </ListItem>
-              ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Current Chat Section */}
-      <Box
-        style={{
-          width: "100%",
-          padding: "16px",
-          marginLeft: "auto",
-          marginRight: "auto",
-          maxWidth: "1200px",
-          color: darkMode ? '#f5f5f5' : '#121212'
-        }}
-      >
-        <Box 
-          style={{ 
-            maxHeight: "calc(100vh - 200px)", 
-            overflowY: "auto", 
-            marginTop: "16px",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
-          <Typography 
-            variant="h6" 
-            align="center" 
+      {showChatInterface && (
+        <>
+          {/* Hamburger Menu Button */}
+          <IconButton 
+            onClick={toggleDrawer}
             style={{ 
-              marginBottom: "20px",
-              padding: "10px",
-              borderRadius: "8px",
-              backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+              position: 'fixed', 
+              left: 10, 
+              top: 20,
+              zIndex: 1100,
+              color: darkMode ? '#f5f5f5' : '#121212'
             }}
           >
-            {chatNames[currentChatId] || currentChatId}
-          </Typography>
+            <MenuIcon />
+          </IconButton>
 
-          {messages.length > 0 ? (
-            messages.filter((message) => message && message.text && message.sender)
-              .map((message, index) => (
-                <Box
-                  key={index}
-                  style={{
-                    marginBottom: "8px",
-                    textAlign: message.sender === "user" ? "right" : "left",
-                  }}
-                >
-                  <Paper
-                    style={{
-                      display: "inline-block",
-                      padding: "12px 16px",
-                      borderRadius: "16px",
-                      backgroundColor: message.sender === "user" 
-                        ? (darkMode ? 'rgba(25, 118, 210, 0.15)' : 'rgba(25, 118, 210, 0.08)')
-                        : (darkMode ? 'rgba(156, 39, 176, 0.15)' : 'rgba(156, 39, 176, 0.08)'),
-                      color: message.sender === "user"
-                        ? (darkMode ? '#90caf9' : '#1976d2')
-                        : (darkMode ? '#e1bee7' : '#6a1b9a'),
-                      maxWidth: "70%",
-                      boxShadow: darkMode 
-                        ? '0 2px 4px rgba(0,0,0,0.2)' 
-                        : '0 2px 4px rgba(0,0,0,0.1)',
-                      border: message.sender === "user"
-                        ? (darkMode ? '1px solid rgba(25, 118, 210, 0.2)' : '1px solid rgba(25, 118, 210, 0.15)')
-                        : (darkMode ? '1px solid rgba(156, 39, 176, 0.2)' : '1px solid rgba(156, 39, 176, 0.15)'),
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                    }}
-                  >
-                    {message.sender === "bot" ? (
-                      <Typography 
-                        component="div" 
+          {/* Chat History Drawer */}
+          <Drawer
+            anchor="left"
+            open={drawerOpen}
+            onClose={toggleDrawer}
+            variant="temporary"
+            PaperProps={{
+              sx: {
+                backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+                color: darkMode ? '#f5f5f5' : '#121212'
+              }
+            }}
+          >
+            <Box
+              style={{
+                width: "280px",
+                height: "100%",
+                padding: "16px",
+                overflowY: "auto",
+                scrollbarWidth: "none", // Firefox
+                msOverflowStyle: "none", // IE/Edge
+              }}
+            >
+              <Typography variant="h6" align="center">Chat History</Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={createNewChat}
+                style={{ margin: "16px 0" }}
+              >
+                New Chat
+              </Button>
+              <List>
+                {Object.keys(chatHistory)
+                  .filter((chatId) => chatHistory[chatId].length > 0)
+                  .map((chatId) => (
+                    <ListItem
+                      key={chatId}
+                      selected={chatId === currentChatId}
+                      onClick={() => {
+                        loadChat(chatId);
+                        toggleDrawer();
+                      }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: "#f4f4f4",
+                          transition: "background-color 0.3s ease",
+                        },
+                      }}
+                    >
+                      <ListItemText primary={chatNames[chatId] || chatId} />
+                      <Box>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditChatName(chatId);
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteChat(chatId);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                      </Box>
+                    </ListItem>
+                  ))}
+              </List>
+            </Box>
+          </Drawer>
+
+          {/* Current Chat Section */}
+          <Box
+            style={{
+              width: "100%",
+              padding: "16px",
+              marginLeft: "auto",
+              marginRight: "auto",
+              maxWidth: "1200px",
+              color: darkMode ? '#f5f5f5' : '#121212'
+            }}
+          >
+            <Box 
+              style={{ 
+                maxHeight: "calc(100vh - 200px)", 
+                overflowY: "auto", 
+                marginTop: "16px",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              <Typography 
+                variant="h6" 
+                align="center" 
+                style={{ 
+                  marginBottom: "20px",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+                }}
+              >
+                {chatNames[currentChatId] || currentChatId}
+              </Typography>
+
+              {messages.length > 0 ? (
+                messages.filter((message) => message && message.text && message.sender)
+                  .map((message, index) => (
+                    <Box
+                      key={index}
+                      style={{
+                        marginBottom: "8px",
+                        textAlign: message.sender === "user" ? "right" : "left",
+                      }}
+                    >
+                      <Paper
                         style={{
-                          fontSize: '0.95rem',
-                          lineHeight: '1.5',
-                          letterSpacing: '0.015em'
+                          display: "inline-block",
+                          padding: "12px 16px",
+                          borderRadius: "16px",
+                          backgroundColor: message.sender === "user" 
+                            ? (darkMode ? 'rgba(25, 118, 210, 0.15)' : 'rgba(25, 118, 210, 0.08)')
+                            : (darkMode ? 'rgba(156, 39, 176, 0.15)' : 'rgba(156, 39, 176, 0.08)'),
+                          color: message.sender === "user"
+                            ? (darkMode ? '#90caf9' : '#1976d2')
+                            : (darkMode ? '#e1bee7' : '#6a1b9a'),
+                          maxWidth: "70%",
+                          boxShadow: darkMode 
+                            ? '0 2px 4px rgba(0,0,0,0.2)' 
+                            : '0 2px 4px rgba(0,0,0,0.1)',
+                          border: message.sender === "user"
+                            ? (darkMode ? '1px solid rgba(25, 118, 210, 0.2)' : '1px solid rgba(25, 118, 210, 0.15)')
+                            : (darkMode ? '1px solid rgba(156, 39, 176, 0.2)' : '1px solid rgba(156, 39, 176, 0.15)'),
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
                         }}
                       >
-                        {typeof message.text === 'object' && message.text.type === 'card' && message.text.content ? (
-                          <Paper
-                            elevation={3}
+                        {message.sender === "bot" ? (
+                          <Typography 
+                            component="div" 
                             style={{
-                              maxWidth: '400px',
-                              width: '100%',
-                              borderRadius: '12px',
-                              overflow: 'hidden',
-                              backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                              border: darkMode 
-                                ? '1px solid rgba(255,255,255,0.1)'
-                                : '1px solid rgba(0,0,0,0.1)',
-                              margin: '0 auto'
+                              fontSize: '0.95rem',
+                              lineHeight: '1.5',
+                              letterSpacing: '0.015em'
                             }}
                           >
-                            {message.text.content.image && (
-                              <img 
-                                src={message.text.content.image} 
-                                alt="Smartwatch" 
+                            {typeof message.text === 'object' && message.text.type === 'card' && message.text.content ? (
+                              <Paper
+                                elevation={3}
                                 style={{
+                                  maxWidth: '400px',
                                   width: '100%',
-                                  height: 'auto',
-                                  objectFit: 'cover',
-                                  display: 'block'
-                                }}
-                              />
-                            )}
-                            <Box p={2}>
-                              {message.text.content.title && (
-                                <Typography 
-                                  variant="h6" 
-                                  style={{
-                                    marginBottom: '8px',
-                                    color: darkMode ? '#f5f5f5' : '#121212',
-                                    fontWeight: 'bold'
-                                  }}
-                                >
-                                  {message.text.content.title}
-                                </Typography>
-                              )}
-                              {message.text.content.specs && message.text.content.specs.length > 0 && (
-                                <Box 
-                                  style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(2, 1fr)',
-                                    gap: '8px',
-                                    marginBottom: '12px'
-                                  }}
-                                >
-                                  {message.text.content.specs.map((spec, index) => (
-                                    <Box key={index}>
-                                      <Typography 
-                                        variant="caption" 
-                                        style={{
-                                          color: darkMode ? '#b3b3b3' : '#666666',
-                                          display: 'block'
-                                        }}
-                                      >
-                                        {spec.label}
-                                      </Typography>
-                                      <Typography 
-                                        variant="body2"
-                                        style={{
-                                          color: darkMode ? '#e1bee7' : '#6a1b9a',
-                                          fontWeight: '500'
-                                        }}
-                                      >
-                                        {spec.value}
-                                      </Typography>
-                                    </Box>
-                                  ))}
-                                </Box>
-                              )}
-                              {message.text.content.price && (
-                                <Typography 
-                                  variant="h6" 
-                                  style={{
-                                    color: darkMode ? '#90caf9' : '#1976d2',
-                                    fontWeight: 'bold',
-                                    textAlign: 'right'
-                                  }}
-                                >
-                                  {message.text.content.price}
-                                </Typography>
-                              )}
-                            </Box>
-                            {message.text.content.colors && message.text.content.colors.length > 0 && (
-                              <Box 
-                                style={{
-                                  borderTop: darkMode 
+                                  borderRadius: '12px',
+                                  overflow: 'hidden',
+                                  backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                                  border: darkMode 
                                     ? '1px solid rgba(255,255,255,0.1)'
                                     : '1px solid rgba(0,0,0,0.1)',
-                                  marginTop: '12px',
-                                  padding: '12px 16px',
+                                  margin: '0 auto'
                                 }}
                               >
-                                <Typography 
-                                  variant="subtitle2" 
-                                  style={{
-                                    color: darkMode ? '#b3b3b3' : '#666666',
-                                    marginBottom: '8px',
-                                    paddingLeft: '8px'
-                                  }}
-                                >
-                                  Available Colors:
-                                </Typography>
-                                <Box 
-                                  style={{
-                                    display: 'flex',
-                                    gap: '8px',
-                                    justifyContent: 'flex-start',
-                                    flexWrap: 'wrap',
-                                    padding: '0 8px'
-                                  }}
-                                >
-                                  {message.text.content.colors.map((color, index) => (
-                                    <Paper
-                                      key={index}
-                                      elevation={2}
+                                {message.text.content.image && (
+                                  <img 
+                                    src={message.text.content.image} 
+                                    alt="Smartwatch" 
+                                    style={{
+                                      width: '100%',
+                                      height: 'auto',
+                                      objectFit: 'cover',
+                                      display: 'block'
+                                    }}
+                                  />
+                                )}
+                                <Box p={2}>
+                                  {message.text.content.title && (
+                                    <Typography 
+                                      variant="h6" 
                                       style={{
-                                        width: '70px',
-                                        height: '70px',
-                                        borderRadius: '8px',
-                                        overflow: 'hidden',
-                                        border: darkMode 
-                                          ? '1px solid rgba(255,255,255,0.2)'
-                                          : '1px solid rgba(0,0,0,0.1)',
-                                        cursor: 'pointer',
-                                        transition: 'transform 0.2s ease',
-                                        '&:hover': {
-                                          transform: 'scale(1.05)'
-                                        }
+                                        marginBottom: '8px',
+                                        color: darkMode ? '#f5f5f5' : '#121212',
+                                        fontWeight: 'bold'
                                       }}
                                     >
-                                      <img 
-                                        src={color.image} 
-                                        alt={color.name}
-                                        style={{
-                                          width: '100%',
-                                          height: '100%',
-                                          objectFit: 'cover'
-                                        }}
-                                      />
-                                    </Paper>
-                                  ))}
+                                      {message.text.content.title}
+                                    </Typography>
+                                  )}
+                                  {message.text.content.specs && message.text.content.specs.length > 0 && (
+                                    <Box 
+                                      style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '8px',
+                                        marginBottom: '12px'
+                                      }}
+                                    >
+                                      {message.text.content.specs.map((spec, index) => (
+                                        <Box key={index}>
+                                          <Typography 
+                                            variant="caption" 
+                                            style={{
+                                              color: darkMode ? '#b3b3b3' : '#666666',
+                                              display: 'block'
+                                            }}
+                                          >
+                                            {spec.label}
+                                          </Typography>
+                                          <Typography 
+                                            variant="body2"
+                                            style={{
+                                              color: darkMode ? '#e1bee7' : '#6a1b9a',
+                                              fontWeight: '500'
+                                            }}
+                                          >
+                                            {spec.value}
+                                          </Typography>
+                                        </Box>
+                                      ))}
+                                    </Box>
+                                  )}
+                                  {message.text.content.price && (
+                                    <Typography 
+                                      variant="h6" 
+                                      style={{
+                                        color: darkMode ? '#90caf9' : '#1976d2',
+                                        fontWeight: 'bold',
+                                        textAlign: 'right'
+                                      }}
+                                    >
+                                      {message.text.content.price}
+                                    </Typography>
+                                  )}
                                 </Box>
-                                {message.text.content.rating && message.text.content.reviews && (
+                                {message.text.content.colors && message.text.content.colors.length > 0 && (
                                   <Box 
                                     style={{
-                                      display: 'flex',
-                                      justifyContent: 'space-between',
-                                      alignItems: 'center',
+                                      borderTop: darkMode 
+                                        ? '1px solid rgba(255,255,255,0.1)'
+                                        : '1px solid rgba(0,0,0,0.1)',
                                       marginTop: '12px',
-                                      padding: '0 16px 16px',
-                                      flexWrap: 'wrap',
-                                      gap: '8px'
+                                      padding: '12px 16px',
                                     }}
                                   >
                                     <Typography 
-                                      variant="body2"
-                                      style={{
-                                        color: darkMode ? '#90caf9' : '#1976d2',
-                                        whiteSpace: 'nowrap'
-                                      }}
-                                    >
-                                      {message.text.content.rating}
-                                    </Typography>
-                                    <Typography 
-                                      variant="body2"
+                                      variant="subtitle2" 
                                       style={{
                                         color: darkMode ? '#b3b3b3' : '#666666',
-                                        whiteSpace: 'nowrap'
+                                        marginBottom: '8px',
+                                        paddingLeft: '8px'
                                       }}
                                     >
-                                      ({message.text.content.reviews} reviews)
+                                      Available Colors:
                                     </Typography>
+                                    <Box 
+                                      style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        justifyContent: 'flex-start',
+                                        flexWrap: 'wrap',
+                                        padding: '0 8px'
+                                      }}
+                                    >
+                                      {message.text.content.colors.map((color, index) => (
+                                        <Paper
+                                          key={index}
+                                          elevation={2}
+                                          style={{
+                                            width: '70px',
+                                            height: '70px',
+                                            borderRadius: '8px',
+                                            overflow: 'hidden',
+                                            border: darkMode 
+                                              ? '1px solid rgba(255,255,255,0.2)'
+                                              : '1px solid rgba(0,0,0,0.1)',
+                                            cursor: 'pointer',
+                                            transition: 'transform 0.2s ease',
+                                            '&:hover': {
+                                              transform: 'scale(1.05)'
+                                            }
+                                          }}
+                                        >
+                                          <img 
+                                            src={color.image} 
+                                            alt={color.name}
+                                            style={{
+                                              width: '100%',
+                                              height: '100%',
+                                              objectFit: 'cover'
+                                            }}
+                                          />
+                                        </Paper>
+                                      ))}
+                                    </Box>
+                                    {message.text.content.rating && message.text.content.reviews && (
+                                      <Box 
+                                        style={{
+                                          display: 'flex',
+                                          justifyContent: 'space-between',
+                                          alignItems: 'center',
+                                          marginTop: '12px',
+                                          padding: '0 16px 16px',
+                                          flexWrap: 'wrap',
+                                          gap: '8px'
+                                        }}
+                                      >
+                                        <Typography 
+                                          variant="body2"
+                                          style={{
+                                            color: darkMode ? '#90caf9' : '#1976d2',
+                                            whiteSpace: 'nowrap'
+                                          }}
+                                        >
+                                          {message.text.content.rating}
+                                        </Typography>
+                                        <Typography 
+                                          variant="body2"
+                                          style={{
+                                            color: darkMode ? '#b3b3b3' : '#666666',
+                                            whiteSpace: 'nowrap'
+                                          }}
+                                        >
+                                          ({message.text.content.reviews} reviews)
+                                        </Typography>
+                                      </Box>
+                                    )}
                                   </Box>
                                 )}
-                              </Box>
+                              </Paper>
+                            ) : (
+                              typeof message.text === 'string' ? (
+                                <>
+                                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                                  {message.showImageButton && (
+                                    <Button
+                                      variant="contained"
+                                      color="primary"
+                                      onClick={handleShowImage}
+                                      style={{
+                                        marginTop: '10px',
+                                        background: darkMode 
+                                          ? 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
+                                          : 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+                                        boxShadow: darkMode 
+                                          ? '0 3px 5px 2px rgba(33, 203, 243, .3)'
+                                          : '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                                        color: '#fff',
+                                        borderRadius: '20px',
+                                        padding: '8px 20px',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                          transform: 'scale(1.05)',
+                                          background: darkMode 
+                                            ? 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)'
+                                            : 'linear-gradient(45deg, #FF8E53 30%, #FE6B8B 90%)'
+                                        }
+                                      }}
+                                    >
+                                      Show Smartwatch Details 🎯
+                                    </Button>
+                                  )}
+                                </>
+                              ) : (
+                                <Typography>Invalid message format</Typography>
+                              )
                             )}
-                          </Paper>
+                          </Typography>
                         ) : (
-                          typeof message.text === 'string' ? (
-                            <ReactMarkdown>{message.text}</ReactMarkdown>
-                          ) : (
-                            <Typography>Invalid message format</Typography>
-                          )
+                          <Typography 
+                            style={{
+                              fontSize: '0.95rem',
+                              lineHeight: '1.5',
+                              letterSpacing: '0.015em'
+                            }}
+                          >
+                            {message.text}
+                          </Typography>
                         )}
-                      </Typography>
-                    ) : (
-                      <Typography 
-                        style={{
-                          fontSize: '0.95rem',
-                          lineHeight: '1.5',
-                          letterSpacing: '0.015em'
-                        }}
-                      >
-                        {message.text}
-                      </Typography>
-                    )}
-                  </Paper>
-                </Box>
-              ))
-          ) : (
-            <Typography variant="body2" color="textSecondary" align="center">
-              No messages yet.
-            </Typography>
-          )}
-        </Box>
+                      </Paper>
+                    </Box>
+                  ))
+              ) : (
+                <Typography variant="body2" color="textSecondary" align="center">
+                  No messages yet.
+                </Typography>
+              )}
+            </Box>
 
-        <Box display="flex" alignItems="center" marginTop="16px">
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Type your message..."
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={(e) => { if (e.key === "Enter") handleSendMessage(); }}
-            sx={{
-              backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: darkMode ? '#f5f5f5' : '#121212',
-                },
-                '&:hover fieldset': {
-                  borderColor: darkMode ? '#90caf9' : '#1976d2',
-                },
-              },
+            <Box display="flex" alignItems="center" marginTop="16px">
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Type your message..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                sx={{
+                  backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: darkMode ? '#f5f5f5' : '#121212',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: darkMode ? '#90caf9' : '#1976d2',
+                    },
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSendMessage}
+                style={{ marginLeft: "8px" }}
+              >
+                Send
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={startListening}
+                style={{ marginLeft: "8px" }}
+                disabled={isListening}
+              >
+                🎤
+              </Button>
+            </Box>
+          </Box>
+        </>
+      )}
+
+      {showWelcomeButton && (
+        <Box
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000,
+            textAlign: 'center'
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={greetUser}
+            style={{
+              padding: '20px 40px',
+              fontSize: '1.2rem',
+              borderRadius: '30px',
+              background: darkMode 
+                ? 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
+                : 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+              boxShadow: darkMode 
+                ? '0 3px 5px 2px rgba(33, 203, 243, .3)'
+                : '0 3px 5px 2px rgba(255, 105, 135, .3)',
+              color: '#fff',
+              textTransform: 'none',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                background: darkMode 
+                  ? 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)'
+                  : 'linear-gradient(45deg, #FF8E53 30%, #FE6B8B 90%)'
+              }
             }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSendMessage}
-            style={{ marginLeft: "8px" }}
           >
-            Send
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={startListening}
-            style={{ marginLeft: "8px" }}
-            disabled={isListening}
-          >
-            🎤
+            <Typography 
+              variant="h5" 
+              style={{ 
+                fontWeight: 'bold'
+              }}
+            >
+              Start Conversation
+            </Typography>
           </Button>
         </Box>
-      </Box>
+      )}
     </Container>
   );
 };
