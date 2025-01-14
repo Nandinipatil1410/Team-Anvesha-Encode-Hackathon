@@ -1,5 +1,6 @@
 const axios = require('axios');
 
+const NVIDIA_API_KEY = process.env.REACT_APP_NVIDIA_API_KEY;
 // This function will be triggered when a POST request is made to /api/nvidia
 module.exports = async (req, res) => {
   if (req.method === 'POST') {
@@ -18,7 +19,7 @@ module.exports = async (req, res) => {
         },
         {
           headers: {
-            Authorization: `Bearer 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`, // Store API Key in .env
+            Authorization: `Bearer ${NVIDIA_API_KEY}`, // Store API Key in .env
             'Content-Type': 'application/json',
           },
         }

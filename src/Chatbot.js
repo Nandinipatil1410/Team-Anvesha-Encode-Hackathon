@@ -96,8 +96,8 @@ const intents = [
     response: {
       type: 'card',
       content: {
-        image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg',
-        title: 'Fire-Boltt Ninja Call Pro Plus Smart Watch',
+        image: '/images/img1.jpeg',
+        title: 'SmartTech Ultra Watch',
         specs: [
           { label: 'Display', value: '1.83" HD' },
           { label: 'Resolution', value: '240x280px' },
@@ -105,19 +105,13 @@ const intents = [
           { label: 'Bluetooth', value: 'Calling' },
           { label: 'Sports Modes', value: '100+' }
         ],
-        price: '$200',
+        price: '₹5,000',
         colors: [
-          {
-            image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-          },
-          {
-            image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-          },
-          {
-            image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg'
-          }
+          { image: '/images/img2.jpeg', style: { width: '100px', height: '100px' } },
+          { image: '/images/img3.jpeg', style: { width: '100px', height: '100px' } },
+          { image: '/images/img4.jpeg', style: { width: '100px', height: '100px' } }
         ],
-        rating: '3.9 ★★★★☆',
+        rating: '4.5 ★★★★☆',
         reviews: '42,431'
       }
     }
@@ -187,8 +181,8 @@ const ChatApp = () => {
     const imageCard = {
       type: 'card',
       content: {
-        image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg',
-        title: 'Fire-Boltt Ninja Call Pro Plus Smart Watch',
+        image: '/images/img1.jpeg',
+        title: 'SmartTech Ultra Watch',
         specs: [
           { label: 'Display', value: '1.83" HD' },
           { label: 'Resolution', value: '240x280px' },
@@ -196,11 +190,11 @@ const ChatApp = () => {
           { label: 'Bluetooth', value: 'Calling' },
           { label: 'Sports Modes', value: '100+' }
         ],
-        price: '$200',
+        price: '₹5,000',
         colors: [
-          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' },
-          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' },
-          { image: 'https://m.media-amazon.com/images/I/61S9aVnRZDL._SL1500_.jpg' }
+          { image: '/images/img2.jpeg', style: { width: '100px', height: '100px' } },
+          { image: '/images/img3.jpeg', style: { width: '100px', height: '100px' } },
+          { image: '/images/img4.jpeg', style: { width: '100px', height: '100px' } }
         ],
         rating: '3.9 ★★★★☆',
         reviews: '42,431'
@@ -264,13 +258,14 @@ const ChatApp = () => {
     }
   };
   
+  const SMALLEST_AI_API_KEY = process.env.REACT_APP_SMALLEST_AI_API_KEY;
 
   const fetchVoiceFromSmallestAI = async (text) => {
     try {
       const options = {
         method: "POST",
         headers: {
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzdiNzZjZWM0NDE1ODdhYjZlZGYyM2YiLCJrZXlOYW1lIjoiY2hhdGJvdCIsImlhdCI6MTczNjE0NzIyOX0.NcMBx8eHmYLYcZJslVScB8gEtVfYKFGw8AUB5dkVhSM",
+          Authorization: `Bearer ${SMALLEST_AI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -773,8 +768,8 @@ const ChatApp = () => {
                                           key={index}
                                           elevation={2}
                                           style={{
-                                            width: '70px',
-                                            height: '70px',
+                                            width: '100px',
+                                            height: '100px',
                                             borderRadius: '8px',
                                             overflow: 'hidden',
                                             border: darkMode 
