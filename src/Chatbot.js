@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { Container, Button, TextField, Paper, Box, Typography, List, ListItem, ListItemText, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
@@ -147,6 +147,16 @@ const ChatApp = () => {
   const [showImageButton, setShowImageButton] = useState(true);
 
   const MAX_CHUNK_LENGTH = 200;
+
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const greetUser = async () => {
     setShowWelcomeButton(false);
@@ -865,6 +875,7 @@ const ChatApp = () => {
                   No messages yet.
                 </Typography>
               )}
+              <div ref={messagesEndRef} />
             </Box>
 
             <Box display="flex" alignItems="center" marginTop="16px">
