@@ -149,6 +149,7 @@ const ChatApp = () => {
   const MAX_CHUNK_LENGTH = 200;
 
   const messagesEndRef = useRef(null);
+  const currentAudioRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -305,15 +306,30 @@ const ChatApp = () => {
   };
   
   const speakResponse = async (text) => {
+    // Stop any ongoing speech
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+
     const strippedText = stripMarkdown(text);
     const chunks = splitTextIntoChunks(strippedText, MAX_CHUNK_LENGTH);
+    
     for (const chunk of chunks) {
       const audioUrl = await fetchVoiceFromSmallestAI(chunk);
       if (audioUrl) {
         const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio; // Store the current audio
+
         await new Promise((resolve) => {
-          audio.onended = resolve;
-          audio.onerror = resolve;
+          audio.onended = () => {
+            currentAudioRef.current = null; // Clear reference when done
+            resolve();
+          };
+          audio.onerror = () => {
+            currentAudioRef.current = null; // Clear reference on error
+            resolve();
+          };
           audio.play();
         });
       }
